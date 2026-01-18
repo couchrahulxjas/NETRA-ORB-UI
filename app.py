@@ -3,19 +3,15 @@ import pandas as pd
 import os
 from PIL import Image
 
-# ---------------------------
-# Page config
-# ---------------------------
+
 st.set_page_config(
-    page_title="Indian Satellite Anomaly Detection and Orbit Analysis",
+    page_title="NETRA-ORB Indian Satellite's Anomaly Detection and Orbit Analysis",
     layout="wide"
 )
 
 ROOT = os.getcwd()
 
-# ---------------------------
-# Sidebar: Mode Selector
-# ---------------------------
+
 st.sidebar.title("Analysis Mode")
 
 mode = st.sidebar.radio(
@@ -23,9 +19,7 @@ mode = st.sidebar.radio(
     ["Single Satellite Analysis", "Collective Analysis (All Indian Satellites)"]
 )
 
-# ---------------------------
-# Load summary data
-# ---------------------------
+
 summary_path = os.path.join(ROOT, "fleet_summary.csv")
 
 if not os.path.exists(summary_path):
@@ -34,9 +28,7 @@ if not os.path.exists(summary_path):
 
 df = pd.read_csv(summary_path)
 
-# ===========================
-# MODE 1 — SINGLE SATELLITE
-# ===========================
+
 if mode == "Single Satellite Analysis":
 
     st.title("Indian Satellite Anomaly Detection")
@@ -50,15 +42,11 @@ if mode == "Single Satellite Analysis":
     sat_path = os.path.join(ROOT, sat)
     img_dir = os.path.join(sat_path, "images")
 
-    # ---------------------------
-    # Satellite Header
-    # ---------------------------
+  
     st.markdown(f"# {sat}")
     st.markdown("### Indian Satellite's Orbital Behavior, Error Analysis & Anomaly Detection")
 
-    # ---------------------------
-    # BIG METRICS EXPLANATION POPOVER
-    # ---------------------------
+    
     with st.popover(" What do these metrics mean?"):
         st.markdown("""
 #  LSTM (Machine Learning) Orbit Prediction Metrics
@@ -165,9 +153,7 @@ They represent:
 > Together, they form a **machine learning vs physics comparison framework** for space situational awareness.
 """)
 
-    # ---------------------------
-    # Metrics
-    # ---------------------------
+    
     row = df[df["satellite"] == sat].iloc[0]
 
     st.subheader(" Key Health Metrics")
@@ -202,9 +188,7 @@ They represent:
 
     st.markdown("---")
 
-    # ---------------------------
-    # Image helper
-    # ---------------------------
+    
     def show_image(path, caption):
         if os.path.exists(path):
             img = Image.open(path)
@@ -212,9 +196,7 @@ They represent:
         else:
             st.warning(f"Missing file: {os.path.basename(path)}")
 
-    # ---------------------------
-    # TOP SECTION — 5 KEY RESULTS
-    # ---------------------------
+    
     st.subheader(" Key Results")
 
     r1c1, r1c2, r1c3 = st.columns(3)
@@ -264,9 +246,7 @@ They represent:
                 with cols[i % 3]:
                     show_image(img_path, img.replace(".png", "").replace("_", " ").title())
 
-# ===========================
-# MODE 2 — COLLECTIVE VIEW
-# ===========================
+
 else:
 
     st.title(" Collective Analysis — All Indian Satellites")
@@ -289,9 +269,7 @@ Used for understanding overall stability, reliability, and anomaly patterns.
                 st.markdown(f"## {img.replace('_',' ').replace('.png','').title()}")
                 st.image(Image.open(img_path), use_container_width=True)
 
-# ---------------------------
-# Footer
-# ---------------------------
+
 st.markdown("---")
 st.markdown("""
 ### About this Project
