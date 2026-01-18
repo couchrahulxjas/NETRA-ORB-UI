@@ -31,7 +31,7 @@ df = pd.read_csv(summary_path)
 
 if mode == "Single Satellite Analysis":
 
-    st.title("Indian Satellite Anomaly Detection")
+    st.title("NETRA-ORB-Indian Satellite Anomaly Detector")
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("Select Satellite")
