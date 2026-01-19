@@ -3,14 +3,12 @@ import pandas as pd
 import os
 from PIL import Image
 
-
 st.set_page_config(
     page_title="NETRA-ORB Indian Satellite's Anomaly Detection and Orbit Analysis",
     layout="wide"
 )
 
 ROOT = os.getcwd()
-
 
 st.sidebar.title("Analysis Mode")
 
@@ -19,7 +17,6 @@ mode = st.sidebar.radio(
     ["Single Satellite Analysis", "Collective Analysis (All Indian Satellites)"]
 )
 
-
 summary_path = os.path.join(ROOT, "fleet_summary.csv")
 
 if not os.path.exists(summary_path):
@@ -27,6 +24,7 @@ if not os.path.exists(summary_path):
     st.stop()
 
 df = pd.read_csv(summary_path)
+
 
 
 if mode == "Single Satellite Analysis":
@@ -42,7 +40,6 @@ if mode == "Single Satellite Analysis":
     sat_path = os.path.join(ROOT, sat)
     img_dir = os.path.join(sat_path, "images")
 
-  
     st.markdown(f"# {sat}")
     st.markdown("### Indian Satellite's Orbital Behavior, Error Analysis & Anomaly Detection")
 
@@ -97,10 +94,6 @@ The **largest single error** ever produced by the neural network.
 **Why it exists:**  
 In safety-critical systems, worst-case behavior matters more than average behavior.
 
-**How to interpret:**  
-- Low max error → The model is safe and bounded.  
-- Very high max error → Potential dangerous failure, maneuver, or anomaly.
-
 **What it means physically:**  
 This corresponds to the **worst orbital misprediction** your model ever made.
 
@@ -110,9 +103,6 @@ This corresponds to the **worst orbital misprediction** your model ever made.
 
 **What it is:**  
 The error value below which **95% of all prediction errors lie**.
-
-**Why it exists:**  
-This is a **robust reliability metric** used in aerospace and safety-critical systems.
 
 **What it means physically:**  
 This defines a **confidence envelope** around the predicted orbit.
@@ -124,9 +114,6 @@ This defines a **confidence envelope** around the predicted orbit.
 **What it is:**  
 The number of time steps where the satellite’s behavior **deviates significantly from the learned normal orbital pattern**.
 
-**What it means physically:**  
-Acts as a **health and activity indicator** for the satellite.
-
 ---
 
 #  SGP4 (Physics-Based Model) Error Metrics (in KM)
@@ -135,30 +122,34 @@ These metrics evaluate the **classical physics-based orbit propagation model**.
 
 ---
 
-##  SGP4 Mean / Median / Max / P95 / Std
+##  SGP4 Mean / Median / P95
 
 They represent:
 - Average accuracy  
 - Typical error  
-- Worst-case error  
 - 95% confidence bound  
-- Stability / predictability of the orbit  
+
+> Extreme maneuver / refit discontinuities are excluded from these statistics.
 
 ---
 
 #  High-Level Interpretation
 
-> LSTM metrics measure how well a neural network can learn orbital dynamics without using physics equations.  
-> SGP4 metrics measure how reliable and stable classical physics-based propagation is.  
-> Together, they form a **machine learning vs physics comparison framework** for space situational awareness.
+> LSTM metrics measure learned orbital dynamics.  
+> SGP4 metrics measure physics-based propagation reliability.  
+> Together they form a **machine learning vs physics comparison framework** for space situational awareness.
 """)
 
     
+
     row = df[df["satellite"] == sat].iloc[0]
 
     st.subheader(" Key Health Metrics")
 
-    metric_cols = [c for c in df.columns if c != "satellite"]
+    # Hide misleading SGP4 metrics
+    HIDDEN_COLS = {"sgp4_max_km", "sgp4_std_km"}
+
+    metric_cols = [c for c in df.columns if c != "satellite" and c not in HIDDEN_COLS]
 
     help_map = {
         "mean_error": "Average LSTM prediction error over time",
@@ -168,9 +159,7 @@ They represent:
         "anomaly_count": "Number of detected abnormal behaviors",
         "sgp4_mean_km": "Average physics model error in kilometers",
         "sgp4_median_km": "Typical physics model error in kilometers",
-        "sgp4_max_km": "Worst physics model error in kilometers",
         "sgp4_p95_km": "95% bound of physics error in kilometers",
-        "sgp4_std_km": "Instability / noise of physics prediction",
     }
 
     cols = st.columns(5)
@@ -188,7 +177,8 @@ They represent:
 
     st.markdown("---")
 
-    
+    # ===================== IMAGES =====================
+
     def show_image(path, caption):
         if os.path.exists(path):
             img = Image.open(path)
@@ -196,7 +186,6 @@ They represent:
         else:
             st.warning(f"Missing file: {os.path.basename(path)}")
 
-    
     st.subheader(" Key Results")
 
     r1c1, r1c2, r1c3 = st.columns(3)
@@ -218,7 +207,6 @@ They represent:
     with r2c2:
         show_image(os.path.join(img_dir, "error_plot.png"), "LSTM Error Overview")
 
-    
     with st.expander(" Orbital Parameter Analysis"):
         analysis_images = [
             "raan_vs_time.png",
@@ -246,6 +234,7 @@ They represent:
                 with cols[i % 3]:
                     show_image(img_path, img.replace(".png", "").replace("_", " ").title())
 
+# ================= COLLECTIVE MODE =================
 
 else:
 
@@ -269,49 +258,38 @@ Used for understanding overall stability, reliability, and anomaly patterns.
                 st.markdown(f"## {img.replace('_',' ').replace('.png','').title()}")
                 st.image(Image.open(img_path), use_container_width=True)
 
+# ================= FOOTER =================
 
 st.markdown("---")
 st.markdown("""
 ### About this Project
 
-Machine learning (LSTM) based orbital behavior modeling using historical TLE data
-
-Next-step orbital state prediction from past orbital element sequences
-
-Residual-based anomaly detection in Indian satellites (maneuvers, orbit corrections, mission changes)
-
-Error analysis and visualization of ML predictions over time
-
-Fleet-level processing and analysis of 59 Indian satellites
-
-Benchmarking ML prediction error against the physics-based SGP4 propagator
-
+Machine learning (LSTM) based orbital behavior modeling using historical TLE data  
+Next-step orbital state prediction from past orbital element sequences  
+Residual-based anomaly detection in Indian satellites  
+Error analysis and visualization of ML predictions over time  
+Fleet-level processing and analysis of 59 Indian satellites  
+Benchmarking ML prediction error against the physics-based SGP4 propagator  
 Orbital parameter trend analysis (altitude, RAAN, inclination, mean motion, BSTAR, eccentricity)
 """)
 
-
-
 from streamlit_pdf_viewer import pdf_viewer
-import streamlit as st
 
 st.markdown("---")
 
-# Button to show/hide report
 if "show_report" not in st.session_state:
     st.session_state.show_report = False
 
 if st.button("📄 Report"):
     st.session_state.show_report = not st.session_state.show_report
 
-# Show only if clicked
 if st.session_state.show_report:
     st.subheader("📄 Project Report")
 
-    pdf_path = "sat.pdf"   # your pdf file name
+    pdf_path = "sat.pdf"
 
     pdf_viewer(pdf_path)
 
-    # Download button
     with open(pdf_path, "rb") as f:
         st.download_button(
             "📥 Download Project Report",
@@ -319,4 +297,3 @@ if st.session_state.show_report:
             file_name="sat.pdf",
             mime="application/pdf"
         )
-
