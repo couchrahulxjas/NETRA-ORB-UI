@@ -60,12 +60,7 @@ if mode == "Single Satellite Analysis":
     row = df[df["satellite"] == sat].iloc[0]
     behavior = row["behavior_class"]
 
-    if behavior == "STABLE":
-        st.success("🟢 Behavior Class: STABLE (Mostly Passive)")
-    elif behavior == "MODERATELY_ACTIVE":
-        st.warning("🟡 Behavior Class: MODERATELY ACTIVE (Regular Maneuvers)")
-    else:
-        st.error("🔴 Behavior Class: UNSTABLE / HIGHLY MANEUVERING")
+    
 
     # ---------------------------
     # BIG METRICS EXPLANATION POPOVER (FULL ORIGINAL TEXT)
