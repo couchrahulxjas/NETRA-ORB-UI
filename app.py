@@ -4,9 +4,7 @@ import os
 from PIL import Image
 from streamlit_pdf_viewer import pdf_viewer
 
-# ---------------------------
-# Page config
-# ---------------------------
+
 st.set_page_config(
     page_title="NETRA-ORB Indian Satellite's Anomaly Detection and Orbit Analysis",
     layout="wide"
@@ -14,9 +12,7 @@ st.set_page_config(
 
 ROOT = os.getcwd()
 
-# ---------------------------
-# Sidebar
-# ---------------------------
+
 st.sidebar.title("Analysis Mode")
 
 mode = st.sidebar.radio(
@@ -24,9 +20,7 @@ mode = st.sidebar.radio(
     ["Single Satellite Analysis", "Collective Analysis (All Indian Satellites)"]
 )
 
-# ---------------------------
-# Load summary data
-# ---------------------------
+
 summary_path = os.path.join(ROOT, "fleet_summary_with_behavior.csv")
 
 if not os.path.exists(summary_path):
@@ -35,9 +29,7 @@ if not os.path.exists(summary_path):
 
 df = pd.read_csv(summary_path)
 
-# ===========================
-# MODE 1 — SINGLE SATELLITE
-# ===========================
+
 if mode == "Single Satellite Analysis":
 
     st.title("NETRA-ORB — Indian Satellite Anomaly Detector")
@@ -54,17 +46,13 @@ if mode == "Single Satellite Analysis":
     st.markdown(f"# {sat}")
     st.markdown("### Indian Satellite's Orbital Behavior, Error Analysis & Anomaly Detection")
 
-    # ---------------------------
-    # Behavior Class Display
-    # ---------------------------
+   
     row = df[df["satellite"] == sat].iloc[0]
     behavior = row["behavior_class"]
 
     
 
-    # ---------------------------
-    # BIG METRICS EXPLANATION POPOVER (FULL ORIGINAL TEXT)
-    # ---------------------------
+ 
     with st.popover(" What do these metrics mean?"):
         st.markdown("""
 #  LSTM (Machine Learning) Orbit Prediction Metrics
@@ -171,9 +159,7 @@ They represent:
 > Together, they form a **machine learning vs physics comparison framework** for space situational awareness.
 """)
 
-    # ---------------------------
-    # Metrics
-    # ---------------------------
+    
     st.subheader(" Key Health Metrics")
 
     HIDDEN_COLS = {"sgp4_max_km", "sgp4_std_km"}
@@ -193,9 +179,7 @@ They represent:
 
     st.markdown("---")
 
-    # ---------------------------
-    # Image helper
-    # ---------------------------
+    
     def show_image(path, caption):
         if os.path.exists(path):
             img = Image.open(path)
@@ -203,9 +187,7 @@ They represent:
         else:
             st.warning(f"Missing file: {os.path.basename(path)}")
 
-    # ---------------------------
-    # Key Results
-    # ---------------------------
+    
     st.subheader(" Key Results")
 
     r1c1, r1c2, r1c3 = st.columns(3)
@@ -227,9 +209,7 @@ They represent:
     with r2c2:
         show_image(os.path.join(img_dir, "error_plot.png"), "LSTM Error Overview")
 
-    # ---------------------------
-    # Detailed analysis
-    # ---------------------------
+    
     with st.expander(" Orbital Parameter Analysis"):
         analysis_images = [
             "raan_vs_time.png",
@@ -257,9 +237,7 @@ They represent:
                 with cols[i % 3]:
                     show_image(img_path, img.replace(".png", "").replace("_", " ").title())
 
-# ===========================
-# MODE 2 — COLLECTIVE VIEW
-# ===========================
+
 else:
 
     st.title(" Collective Analysis — All Indian Satellites")
@@ -269,9 +247,7 @@ This view shows aggregate analysis across all Indian satellites in the dataset.
 Used for understanding overall stability, reliability, and anomaly patterns.
 """)
 
-    # ---------------------------
-    # Behavior filter
-    # ---------------------------
+    
     st.subheader("🛰️ Filter by Behavior Class")
 
     selected_class = st.selectbox(
@@ -318,9 +294,7 @@ Benchmarking ML prediction error against the physics-based SGP4 propagator
 Orbital parameter trend analysis (altitude, RAAN, inclination, mean motion, BSTAR, eccentricity)
 """)
 
-# ===========================
-# PDF REPORT
-# ===========================
+
 st.markdown("---")
 
 if "show_report" not in st.session_state:
